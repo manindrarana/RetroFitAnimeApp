@@ -7,7 +7,12 @@ data class AnimeResponse(
 data class Anime(
     val mal_id: Int,
     val title: String,
-    val images: AnimeImages
+    val images: AnimeImages,
+    val synopsis: String?,
+    val episodes: Int?,
+    val score: Double?,
+    val genres: List<Genre>,
+    val streaming: List<StreamingPlatform>?
 )
 
 data class AnimeImages(
@@ -16,4 +21,14 @@ data class AnimeImages(
 
 data class AnimeImageDetails(
     val image_url: String
+)
+
+data class Genre(
+    val mal_id: Int,
+    val name: String
+)
+
+data class StreamingPlatform(
+    val name: String,
+    val url: String
 )

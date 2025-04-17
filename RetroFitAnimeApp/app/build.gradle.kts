@@ -56,4 +56,14 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //Compose ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    //Network calls
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    //Json to Kotlin object mapping
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    //Image loading
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    
 }

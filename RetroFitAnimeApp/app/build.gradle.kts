@@ -65,5 +65,9 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     //Image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
-    
+
+    val nav_version = "2.7.2"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
+
 }

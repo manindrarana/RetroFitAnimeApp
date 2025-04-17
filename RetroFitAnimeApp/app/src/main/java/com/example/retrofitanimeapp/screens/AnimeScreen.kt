@@ -1,7 +1,9 @@
 package com.example.retrofitanimeapp.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,13 +24,11 @@ import com.example.retrofitanimeapp.ui.theme.ButtonTextColor
 import com.example.retrofitanimeapp.ui.theme.Typography
 
 @Composable
-fun AnimeScreen(modifier: Modifier = Modifier) {
+fun AnimeScreen(modifier: Modifier = Modifier, onAnimeClick: (Int) -> Unit) {
     val viewModel: MainViewModel = viewModel()
     val viewState by viewModel.animeState
 
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedCategory by remember { mutableStateOf("All") }
-    val categories = listOf("All", "Action", "Comedy", "Drama", "Fantasy")
 
     Column(
         modifier = Modifier
@@ -45,45 +45,17 @@ fun AnimeScreen(modifier: Modifier = Modifier) {
                 .padding(bottom = 16.dp)
         )
 
-        var expanded by remember { mutableStateOf(false) }
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Button(
-                onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ButtonColor,
-                    contentColor = ButtonTextColor
-                )
-            ) {
-                Text(text = selectedCategory, style = Typography.bodyLarge)
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                categories.forEach { category ->
-                    DropdownMenuItem(
-                        text = { Text(category, style = Typography.bodyLarge) },
-                        onClick = {
-                            selectedCategory = category
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Button(
-            onClick = { viewModel.fetchAnimeList() },
+            onClick = {
+                viewModel.fetchAnimeList()
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = ButtonColor,
                 contentColor = ButtonTextColor
             )
         ) {
-            Text("Refresh List", style = Typography.bodyLarge)
+            Text("Search", style = Typography.bodyLarge)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,12 +63,12 @@ fun AnimeScreen(modifier: Modifier = Modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             when {
                 viewState.loading -> {
-                    CircularProgressIndicator(modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
                 viewState.error != null -> {
                     Text(
-                        text = "Error: ${viewState.error}",
+                        text = "Error: ${viewState.error}\nPlease check the internet connection.",
                         modifier = Modifier.align(Alignment.Center),
                         style = Typography.bodyLarge,
                         color = ButtonTextColor
@@ -104,13 +76,19 @@ fun AnimeScreen(modifier: Modifier = Modifier) {
                 }
 
                 else -> {
-                    val filteredList = viewState.list
-                        .filter { anime ->
-                            (selectedCategory == "All" || anime.title.contains(selectedCategory, ignoreCase = true)) &&
-                                    anime.title.contains(searchQuery.text, ignoreCase = true)
-                        }
-                        .take(5)
-                    AnimeGrid(animeList = filteredList)
+                    val filteredList = viewState.list.filter { anime ->
+                        anime.title.contains(searchQuery.text, ignoreCase = true)
+                    }
+                    if (filteredList.isEmpty()) {
+                        Text(
+                            text = "No anime found.",
+                            modifier = Modifier.align(Alignment.Center),
+                            style = Typography.bodyLarge,
+                            color = ButtonTextColor
+                        )
+                    } else {
+                        AnimeGrid(animeList = filteredList, onAnimeClick = onAnimeClick)
+                    }
                 }
             }
         }
@@ -118,7 +96,7 @@ fun AnimeScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun AnimeGrid(animeList: List<Anime>) {
+fun AnimeGrid(animeList: List<Anime>, onAnimeClick: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
@@ -127,17 +105,18 @@ fun AnimeGrid(animeList: List<Anime>) {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(animeList) { anime ->
-            AnimeItem(anime = anime)
+            AnimeItem(anime = anime, onClick = onAnimeClick)
         }
     }
 }
 
 @Composable
-fun AnimeItem(anime: Anime) {
+fun AnimeItem(anime: Anime, onClick: (Int) -> Unit) {
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick(anime.mal_id) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(

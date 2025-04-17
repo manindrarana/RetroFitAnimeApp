@@ -23,13 +23,15 @@ class MainViewModel : ViewModel() {
             try {
                 val response = animeService.getAnimeList()
                 Log.d("MainViewModel", "API Response: ${response.data}")
+                // Limit the list to 10-12 animes
+                val limitedList = response.data.take(12)
                 _animeState.value = _animeState.value.copy(
-                    list = response.data,
+                    list = limitedList,
                     loading = false,
                     error = null
                 )
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error fetching anime list", e)
+                Log.e("MainViewModel", "Error fetching anime list: ${e.message}", e)
                 _animeState.value = _animeState.value.copy(
                     loading = false,
                     error = "Error fetching anime list: ${e.message}"

@@ -11,7 +11,9 @@ data class Anime(
     val synopsis: String?,
     val episodes: Int?,
     val score: Double?,
-    val genres: List<Genre>,
+    val type: String?,
+    val status: String?,
+    val genres: List<Genre>?,
     val streaming: List<StreamingPlatform>?
 )
 
@@ -24,7 +26,6 @@ data class AnimeImageDetails(
 )
 
 data class Genre(
-    val mal_id: Int,
     val name: String
 )
 

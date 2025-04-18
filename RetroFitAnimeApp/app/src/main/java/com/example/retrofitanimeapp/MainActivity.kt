@@ -41,7 +41,8 @@ class MainActivity : ComponentActivity() {
                         val animeList = viewModel.animeState.value.list
                         AnimeDetailsScreen(
                             animeId = animeId,
-                            animeList = animeList
+                            animeList = animeList,
+                            navController = navController
                         )
                     }
                 }

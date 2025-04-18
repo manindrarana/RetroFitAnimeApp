@@ -17,40 +17,62 @@ import com.example.retrofitanimeapp.ui.theme.Typography
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.navigation.NavHostController
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.clickable
 
 @Composable
-fun AnimeDetailsScreen(animeId: Int, animeList: List<Anime>) {
+fun AnimeDetailsScreen(animeId: Int, animeList: List<Anime>, navController: NavHostController) {
     val animeDetails = animeList.find { it.title.text.hashCode() == animeId }
 
     if (animeDetails != null) {
-        AnimeDetailsContent(animeDetails = animeDetails)
+        AnimeDetailsContent(animeDetails = animeDetails, navController = navController)
     } else {
         ErrorScreen(errorMessage = "Anime not found.")
     }
 }
 
 @Composable
-fun AnimeDetailsContent(animeDetails: Anime) {
+fun AnimeDetailsContent(animeDetails: Anime, navController: NavHostController) {
     val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(AppPrimaryColor)
             .padding(16.dp)
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = ButtonTextColor,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { navController.popBackStack() }
+            )
+        }
+
         if (!animeDetails.image_url.isNullOrEmpty()) {
             Image(
                 painter = rememberAsyncImagePainter(animeDetails.image_url),
                 contentDescription = animeDetails.title.text,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((0.15f * screenHeight).dp)
+                    .height((0.12f * screenHeight).dp)
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((0.15f * screenHeight).dp)
+                    .height((0.12f * screenHeight).dp)
                     .background(ButtonTextColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -72,25 +94,29 @@ fun AnimeDetailsContent(animeDetails: Anime) {
             Text(
                 text = animeDetails.title.text ?: "Unknown Title",
                 fontSize = 24.sp,
-                style = Typography.bodyLarge
+                style = Typography.bodyLarge,
+                color = ButtonTextColor
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Studio: ${animeDetails.studio ?: "N/A"}",
-                style = Typography.bodyLarge
+                style = Typography.bodyLarge,
+                color = ButtonTextColor
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Genres: ${animeDetails.genres?.joinToString() ?: "N/A"}",
-                style = Typography.bodyLarge
+                style = Typography.bodyLarge,
+                color = ButtonTextColor
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = animeDetails.description ?: "No description available.",
-                style = Typography.bodyLarge
+                style = Typography.bodyLarge,
+                color = ButtonTextColor
             )
         }
     }

@@ -14,6 +14,9 @@ import com.example.retrofitanimeapp.network.Anime
 import com.example.retrofitanimeapp.ui.theme.AppPrimaryColor
 import com.example.retrofitanimeapp.ui.theme.ButtonTextColor
 import com.example.retrofitanimeapp.ui.theme.Typography
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @Composable
 fun AnimeDetailsScreen(animeId: Int, animeList: List<Anime>) {
@@ -28,11 +31,12 @@ fun AnimeDetailsScreen(animeId: Int, animeList: List<Anime>) {
 
 @Composable
 fun AnimeDetailsContent(animeDetails: Anime) {
+    val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels.toFloat()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp)
     ) {
         if (!animeDetails.image_url.isNullOrEmpty()) {
             Image(
@@ -40,13 +44,13 @@ fun AnimeDetailsContent(animeDetails: Anime) {
                 contentDescription = animeDetails.title.text,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                    .height((0.15f * screenHeight).dp)
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                    .height((0.15f * screenHeight).dp)
                     .background(ButtonTextColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -60,31 +64,35 @@ fun AnimeDetailsContent(animeDetails: Anime) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = animeDetails.title.text ?: "Unknown Title",
-            fontSize = 24.sp,
-            style = Typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = animeDetails.title.text ?: "Unknown Title",
+                fontSize = 24.sp,
+                style = Typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Studio: ${animeDetails.studio ?: "N/A"}",
-            style = Typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Studio: ${animeDetails.studio ?: "N/A"}",
+                style = Typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Genres: ${animeDetails.genres?.joinToString() ?: "N/A"}",
-            style = Typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Genres: ${animeDetails.genres?.joinToString() ?: "N/A"}",
+                style = Typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = animeDetails.description ?: "No description available.",
-            style = Typography.bodyLarge
-        )
+            Text(
+                text = animeDetails.description ?: "No description available.",
+                style = Typography.bodyLarge
+            )
+        }
     }
 }
 

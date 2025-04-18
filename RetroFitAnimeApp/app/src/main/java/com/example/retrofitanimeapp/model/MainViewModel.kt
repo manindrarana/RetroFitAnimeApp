@@ -21,7 +21,7 @@ class MainViewModel : ViewModel() {
             try {
                 val animeList = loadAnimeData(context)
                 _animeState.value = _animeState.value.copy(
-                    list = animeList.take(30),
+                    list = animeList,
                     loading = false,
                     error = null
                 )

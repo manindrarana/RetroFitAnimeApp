@@ -31,58 +31,136 @@ fun AnimeScreen(
     val context = LocalContext.current
 
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+    var sortOrder by remember { mutableStateOf("asc") }
+    var expanded by remember { mutableStateOf(false) }
+    var selectedGenre by remember { mutableStateOf<String?>(null) }
+    var isSidebarVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchAnimeList(context)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppPrimaryColor)
-            .padding(16.dp)
-    ) {
-        TextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text("Search Anime", style = Typography.bodyLarge) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                viewState.loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-
-                viewState.error != null -> {
+    Row(modifier = Modifier.fillMaxSize()) {
+        if (isSidebarVisible) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(150.dp)
+                    .background(AppPrimaryColor)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = "Genres",
+                    style = Typography.bodyLarge,
+                    color = ButtonTextColor,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                val genres = viewState.list.flatMap { it.genres ?: emptyList() }.distinct().sorted()
+                genres.forEach { genre ->
                     Text(
-                        text = "Error: ${viewState.error}\nPlease check the data.",
-                        modifier = Modifier.align(Alignment.Center),
-                        style = Typography.bodyLarge,
-                        color = ButtonTextColor
+                        text = genre,
+                        style = Typography.bodyMedium,
+                        color = if (selectedGenre == genre) AppPrimaryColor else ButtonTextColor,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedGenre = if (selectedGenre == genre) null else genre }
+                            .padding(vertical = 4.dp)
+                            .background(if (selectedGenre == genre) ButtonTextColor else AppPrimaryColor)
+                            .padding(8.dp)
                     )
                 }
+            }
+        }
 
-                else -> {
-                    val filteredList = viewState.list
-                        .filter { anime ->
-                            anime.title.text?.contains(searchQuery.text, ignoreCase = true) == true
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f)
+                .background(AppPrimaryColor)
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = { isSidebarVisible = !isSidebarVisible },
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Text(if (isSidebarVisible) "Hide Sidebar" else "Show Sidebar")
+            }
+
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search Anime", style = Typography.bodyLarge) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { expanded = true }) {
+                    Text("Sort By: ${if (sortOrder == "asc") "Ascending" else "Descending"}")
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Ascending") },
+                        onClick = {
+                            sortOrder = "asc"
+                            expanded = false
                         }
-                        .sortedBy { it.title.text }
-                    if (filteredList.isEmpty()) {
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Descending") },
+                        onClick = {
+                            sortOrder = "desc"
+                            expanded = false
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    viewState.loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+
+                    viewState.error != null -> {
                         Text(
-                            text = "No anime found.",
+                            text = "Error: ${viewState.error}\nPlease check the data.",
                             modifier = Modifier.align(Alignment.Center),
                             style = Typography.bodyLarge,
                             color = ButtonTextColor
                         )
-                    } else {
-                        AnimeGrid(animeList = filteredList, onAnimeClick = onAnimeClick)
+                    }
+
+                    else -> {
+                        val filteredList = viewState.list
+                            .filter { anime ->
+                                anime.title.text?.contains(searchQuery.text, ignoreCase = true) == true &&
+                                        (selectedGenre == null || anime.genres?.contains(selectedGenre) == true)
+                            }
+                            .let { list ->
+                                when (sortOrder) {
+                                    "asc" -> list.sortedBy { it.title.text }
+                                    "desc" -> list.sortedByDescending { it.title.text }
+                                    else -> list
+                                }
+                            }
+
+                        if (filteredList.isEmpty()) {
+                            Text(
+                                text = "No anime found.",
+                                modifier = Modifier.align(Alignment.Center),
+                                style = Typography.bodyLarge,
+                                color = ButtonTextColor
+                            )
+                        } else {
+                            AnimeGrid(animeList = filteredList, onAnimeClick = onAnimeClick)
+                        }
                     }
                 }
             }

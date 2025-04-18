@@ -3,6 +3,8 @@ package com.example.retrofitanimeapp.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,18 +16,16 @@ import com.example.retrofitanimeapp.network.Anime
 import com.example.retrofitanimeapp.ui.theme.AppPrimaryColor
 import com.example.retrofitanimeapp.ui.theme.ButtonTextColor
 import com.example.retrofitanimeapp.ui.theme.Typography
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.navigation.NavHostController
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun AnimeDetailsScreen(animeId: Int, animeList: List<Anime>, navController: NavHostController) {
-    val animeDetails = animeList.find { it.title.text.hashCode() == animeId }
+    val animeDetails = animeList.find { it.title.hashCode() == animeId }
 
     if (animeDetails != null) {
         AnimeDetailsContent(animeDetails = animeDetails, navController = navController)
@@ -63,16 +63,16 @@ fun AnimeDetailsContent(animeDetails: Anime, navController: NavHostController) {
         if (!animeDetails.image_url.isNullOrEmpty()) {
             Image(
                 painter = rememberAsyncImagePainter(animeDetails.image_url),
-                contentDescription = animeDetails.title.text,
+                contentDescription = animeDetails.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((0.12f * screenHeight).dp)
+                    .height((0.25f * screenHeight).dp)
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((0.12f * screenHeight).dp)
+                    .height((0.25f * screenHeight).dp)
                     .background(ButtonTextColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -92,18 +92,13 @@ fun AnimeDetailsContent(animeDetails: Anime, navController: NavHostController) {
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = animeDetails.title.text ?: "Unknown Title",
+                text = animeDetails.title,
                 fontSize = 24.sp,
                 style = Typography.bodyLarge,
                 color = ButtonTextColor
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Studio: ${animeDetails.studio ?: "N/A"}",
-                style = Typography.bodyLarge,
-                color = ButtonTextColor
-            )
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(

@@ -1,25 +1,32 @@
 package com.example.retrofitanimeapp.model
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.retrofitanimeapp.network.Anime
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.example.retrofitanimeapp.network.AnimeApiService
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainViewModel : ViewModel() {
 
     private val _animeState = mutableStateOf(AnimeState())
     val animeState: State<AnimeState> = _animeState
 
-    fun fetchAnimeList(context: Context) {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://my-json-server.typicode.com/manindrarana/anime-list-api/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val animeApi = retrofit.create(AnimeApiService::class.java)
+
+    fun fetchAnimeList() {
         viewModelScope.launch {
             try {
-                val animeList = loadAnimeData(context)
+                val animeList = animeApi.getAnimeList()
                 _animeState.value = _animeState.value.copy(
                     list = animeList,
                     loading = false,
@@ -33,12 +40,6 @@ class MainViewModel : ViewModel() {
                 )
             }
         }
-    }
-
-    private fun loadAnimeData(context: Context): List<Anime> {
-        val json = context.assets.open("anime-data.json").bufferedReader().use { it.readText() }
-        val type = object : TypeToken<List<Anime>>() {}.type
-        return Gson().fromJson(json, type)
     }
 
     data class AnimeState(

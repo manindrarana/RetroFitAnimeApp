@@ -37,7 +37,7 @@ fun AnimeScreen(
     var isSidebarVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchAnimeList(context)
+        viewModel.fetchAnimeList()
     }
 
     Row(modifier = Modifier.fillMaxSize()) {
@@ -125,28 +125,23 @@ fun AnimeScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     viewState.loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        LoadingScreen()
                     }
 
                     viewState.error != null -> {
-                        Text(
-                            text = "Error: ${viewState.error}\nPlease check the data.",
-                            modifier = Modifier.align(Alignment.Center),
-                            style = Typography.bodyLarge,
-                            color = ButtonTextColor
-                        )
+                        ErrorScreen(errorMessage = viewState.error!!)
                     }
 
                     else -> {
                         val filteredList = viewState.list
                             .filter { anime ->
-                                anime.title.text?.contains(searchQuery.text, ignoreCase = true) == true &&
+                                (searchQuery.text.isEmpty() || anime.title.contains(searchQuery.text, ignoreCase = true)) &&
                                         (selectedGenre == null || anime.genres?.contains(selectedGenre) == true)
                             }
                             .let { list ->
                                 when (sortOrder) {
-                                    "asc" -> list.sortedBy { it.title.text }
-                                    "desc" -> list.sortedByDescending { it.title.text }
+                                    "asc" -> list.sortedBy { it.title }
+                                    "desc" -> list.sortedByDescending { it.title }
                                     else -> list
                                 }
                             }
@@ -159,7 +154,17 @@ fun AnimeScreen(
                                 color = ButtonTextColor
                             )
                         } else {
-                            AnimeGrid(animeList = filteredList, onAnimeClick = onAnimeClick)
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(filteredList) { anime ->
+                                    AnimeItem(anime = anime, onClick = { onAnimeClick(anime.title.hashCode()) })
+                                }
+                            }
                         }
                     }
                 }
@@ -189,13 +194,13 @@ fun AnimeItem(anime: Anime, onClick: (Int) -> Unit) {
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { onClick(anime.title.text.hashCode()) },
+            .clickable { onClick(anime.title.hashCode()) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (!anime.image_url.isNullOrEmpty()) {
             Image(
                 painter = rememberAsyncImagePainter(anime.image_url),
-                contentDescription = anime.title.text,
+                contentDescription = anime.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
@@ -216,7 +221,7 @@ fun AnimeItem(anime: Anime, onClick: (Int) -> Unit) {
             }
         }
         Text(
-            text = anime.title.text ?: "Unknown Title",
+            text = anime.title,
             modifier = Modifier.padding(top = 8.dp),
             style = Typography.bodyLarge,
             color = ButtonTextColor

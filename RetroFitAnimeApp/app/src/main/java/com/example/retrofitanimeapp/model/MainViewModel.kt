@@ -1,12 +1,14 @@
 package com.example.retrofitanimeapp.model
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.retrofitanimeapp.network.Anime
-import com.example.retrofitanimeapp.network.animeService
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -14,30 +16,29 @@ class MainViewModel : ViewModel() {
     private val _animeState = mutableStateOf(AnimeState())
     val animeState: State<AnimeState> = _animeState
 
-    init {
-        fetchAnimeList()
-    }
-
-    fun fetchAnimeList() {
+    fun fetchAnimeList(context: Context) {
         viewModelScope.launch {
             try {
-                val response = animeService.getAnimeList()
-                Log.d("MainViewModel", "API Response: ${response.data}")
-                // Limit the list to 10-12 animes
-                val limitedList = response.data.take(12)
+                val animeList = loadAnimeData(context)
                 _animeState.value = _animeState.value.copy(
-                    list = limitedList,
+                    list = animeList.take(30),
                     loading = false,
                     error = null
                 )
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error fetching anime list: ${e.message}", e)
+                Log.e("MainViewModel", "Error loading anime data: ${e.message}", e)
                 _animeState.value = _animeState.value.copy(
                     loading = false,
-                    error = "Error fetching anime list: ${e.message}"
+                    error = "Error loading anime data: ${e.message}"
                 )
             }
         }
+    }
+
+    private fun loadAnimeData(context: Context): List<Anime> {
+        val json = context.assets.open("anime-data.json").bufferedReader().use { it.readText() }
+        val type = object : TypeToken<List<Anime>>() {}.type
+        return Gson().fromJson(json, type)
     }
 
     data class AnimeState(

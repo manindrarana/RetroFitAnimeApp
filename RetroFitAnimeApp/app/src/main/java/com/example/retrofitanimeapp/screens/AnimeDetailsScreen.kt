@@ -1,5 +1,7 @@
 package com.example.retrofitanimeapp.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -7,7 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.retrofitanimeapp.network.Anime
+import com.example.retrofitanimeapp.ui.theme.AppPrimaryColor
 import com.example.retrofitanimeapp.ui.theme.ButtonTextColor
 import com.example.retrofitanimeapp.ui.theme.Typography
 
@@ -30,6 +34,32 @@ fun AnimeDetailsContent(animeDetails: Anime) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (!animeDetails.image_url.isNullOrEmpty()) {
+            Image(
+                painter = rememberAsyncImagePainter(animeDetails.image_url),
+                contentDescription = animeDetails.title.text,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .background(ButtonTextColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No Image",
+                    style = Typography.bodyLarge,
+                    color = AppPrimaryColor
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(
             text = animeDetails.title.text ?: "Unknown Title",
             fontSize = 24.sp,
@@ -49,10 +79,6 @@ fun AnimeDetailsContent(animeDetails: Anime) {
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Hype: ${animeDetails.hype ?: "N/A"}",
-            style = Typography.bodyLarge
-        )
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(

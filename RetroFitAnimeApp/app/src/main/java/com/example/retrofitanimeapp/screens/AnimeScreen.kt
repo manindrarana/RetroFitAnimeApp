@@ -61,7 +61,7 @@ fun AnimeScreen(
 
                 viewState.error != null -> {
                     Text(
-                        text = "Error: ${viewState.error}\nPlease check your data.",
+                        text = "Error: ${viewState.error}\nPlease check the data.",
                         modifier = Modifier.align(Alignment.Center),
                         style = Typography.bodyLarge,
                         color = ButtonTextColor
@@ -69,9 +69,11 @@ fun AnimeScreen(
                 }
 
                 else -> {
-                    val filteredList = viewState.list.filter { anime ->
-                        anime.title.text?.contains(searchQuery.text, ignoreCase = true) == true
-                    }
+                    val filteredList = viewState.list
+                        .filter { anime ->
+                            anime.title.text?.contains(searchQuery.text, ignoreCase = true) == true
+                        }
+                        .sortedBy { it.title.text }
                     if (filteredList.isEmpty()) {
                         Text(
                             text = "No anime found.",

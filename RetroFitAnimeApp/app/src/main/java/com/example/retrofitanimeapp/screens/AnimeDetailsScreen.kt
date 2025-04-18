@@ -27,6 +27,7 @@ fun AnimeDetailsScreen(animeId: Int) {
         try {
             Log.d("AnimeDetailsScreen", "Fetching details for animeId: $animeId")
             anime.value = animeService.getAnimeById(animeId)
+            Log.d("AnimeDetailsScreen", "Fetched anime details: $anime")
         } catch (e: Exception) {
             Log.e("AnimeDetailsScreen", "Error fetching anime details: ${e.message}", e)
             errorMessage.value = "Failed to load anime details. Please try again."

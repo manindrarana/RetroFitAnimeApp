@@ -1,6 +1,7 @@
 package com.example.retrofitanimeapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("anime_details/{animeId}") { backStackEntry ->
                         val animeId = backStackEntry.arguments?.getString("animeId")?.toIntOrNull() ?: 0
+                        Log.d("MainActivity", "Navigating to details for animeId: $animeId")
                         AnimeDetailsScreen(animeId = animeId)
                     }
                 }

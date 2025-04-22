@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,8 @@ import com.example.retrofitanimeapp.network.Anime
 import com.example.retrofitanimeapp.ui.theme.AppPrimaryColor
 import com.example.retrofitanimeapp.ui.theme.ButtonTextColor
 import com.example.retrofitanimeapp.ui.theme.Typography
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 
 @Composable
 fun AnimeScreen(
@@ -42,21 +46,23 @@ fun AnimeScreen(
 
     Row(modifier = Modifier.fillMaxSize()) {
         if (isSidebarVisible) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(150.dp)
                     .background(AppPrimaryColor)
                     .padding(8.dp)
             ) {
-                Text(
-                    text = "Genres",
-                    style = Typography.bodyLarge,
-                    color = ButtonTextColor,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                item {
+                    Text(
+                        text = "Genres",
+                        style = Typography.bodyLarge,
+                        color = ButtonTextColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
                 val genres = viewState.list.flatMap { it.genres ?: emptyList() }.distinct().sorted()
-                genres.forEach { genre ->
+                items(genres) { genre ->
                     Text(
                         text = genre,
                         style = Typography.bodyMedium,
@@ -72,21 +78,30 @@ fun AnimeScreen(
             }
         }
 
-        Column(
+                Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(1f)
                 .background(AppPrimaryColor)
                 .padding(16.dp)
         ) {
-            Button(
-                onClick = { isSidebarVisible = !isSidebarVisible },
-                modifier = Modifier.padding(bottom = 16.dp)
+                        Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (isSidebarVisible) "Hide Sidebar" else "Show Sidebar")
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = ButtonTextColor,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { isSidebarVisible = !isSidebarVisible }
+                )
             }
 
-            TextField(
+                        TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 label = { Text("Search Anime", style = Typography.bodyLarge) },
@@ -95,7 +110,7 @@ fun AnimeScreen(
                     .padding(bottom = 16.dp)
             )
 
-            Box(modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                 Button(onClick = { expanded = true }) {
                     Text("Sort By: ${if (sortOrder == "asc") "Ascending" else "Descending"}")
                 }
@@ -122,7 +137,7 @@ fun AnimeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Box(modifier = Modifier.fillMaxSize()) {
+                        Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     viewState.loading -> {
                         LoadingScreen()

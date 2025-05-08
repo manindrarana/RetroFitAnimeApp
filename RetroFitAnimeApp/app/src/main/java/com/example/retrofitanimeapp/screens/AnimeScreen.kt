@@ -88,7 +88,7 @@ fun AnimeScreen(
                         Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 45.dp, top = 45.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(

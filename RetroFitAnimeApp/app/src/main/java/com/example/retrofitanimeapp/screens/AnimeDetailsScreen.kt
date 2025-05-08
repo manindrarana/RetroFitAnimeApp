@@ -47,7 +47,7 @@ fun AnimeDetailsContent(animeDetails: Anime, navController: NavHostController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 16.dp, top = 35.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
